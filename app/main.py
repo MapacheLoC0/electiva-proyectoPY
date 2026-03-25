@@ -1,47 +1,31 @@
-from fastapi import FastAPI, Depends, HTTPException
-from .database import get_connection
+from fastapi import FastAPI, HTTPException
+from database import obtener_conexion
 from psycopg2.extras import RealDictCursor
 
-app = FastAPI(title="API ERP Ciudadela Desepaz")
+app = FastAPI(title="Sistema ERP Pro")
 
-# --- CREATE (Insertar Producto) ---
-@app.post("/productos/")
-def crear_producto(nombre: str, precio: float, id_cat: int, id_prov: int, stock: int = 0, conn = Depends(get_connection)):
-    with conn.cursor(cursor_factory=RealDictCursor) as cur:
-        try:
-            query = """
-                INSERT INTO productos (nombre, precio, stock, id_categoria, id_proveedor)
-                VALUES (%s, %s, %s, %s, %s) RETURNING *;
-            """
-            cur.execute(query, (nombre, precio, stock, id_cat, id_prov))
-            nuevo = cur.fetchone()
-            conn.commit()
-            return nuevo
-        except Exception as e:
-            conn.rollback()
-            raise HTTPException(status_code=400, detail=f"Error en la BD: {e}")
+@app.get("/productos")
+def leer_productos():
+    # 1. Llamamos a la conexión
+    conexion = obtener_conexion()
+    if conexion is None:
+        raise HTTPException(status_code=500, detail="Error de conexión a la base de datos")
 
-# --- READ (Listar todos los productos con su categoría) ---
-@app.get("/productos/")
-def listar_productos(conn = Depends(get_connection)):
-    with conn.cursor(cursor_factory=RealDictCursor) as cur:
-        # Aquí hacemos un JOIN para que el reporte sea más profesional
-        query = """
-            SELECT p.id_producto, p.nombre, p.precio, p.stock, c.nombre as categoria
-            FROM productos p
-            JOIN categorias c ON p.id_categoria = c.id_categoria
-            WHERE p.estado = TRUE;
-        """
-        cur.execute(query)
-        return cur.fetchall()
+    try:
+        # 2. Creamos el cursor (usamos RealDictCursor para recibir diccionarios)
+        cur = conexion.cursor(cursor_factory=RealDictCursor)
+        
+        # 3. Ejecutamos la consulta basada en tu tabla.sql
+        cur.execute("SELECT id_producto, nombre, precio, stock FROM productos WHERE estado = TRUE;")
+        productos = cur.fetchall()
+        
+        return productos
 
-# --- UPDATE (Actualizar Stock) ---
-@app.put("/productos/{id_prod}/stock")
-def actualizar_stock(id_prod: int, nuevo_stock: int, conn = Depends(get_connection)):
-    with conn.cursor(cursor_factory=RealDictCursor) as cur:
-        cur.execute("UPDATE productos SET stock = %s WHERE id_producto = %s RETURNING *;", (nuevo_stock, id_prod))
-        actualizado = cur.fetchone()
-        conn.commit()
-        if not actualizado:
-            raise HTTPException(status_code=404, detail="Producto no encontrado")
-        return actualizado
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    
+    finally:
+        # 4. Cerramos todo (como en tu imagen)
+        cur.close()
+        conexion.close()
+        print("🔌 Conexión finalizada")
