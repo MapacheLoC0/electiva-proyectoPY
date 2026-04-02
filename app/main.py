@@ -1,31 +1,35 @@
-from fastapi import FastAPI, HTTPException
-from database import obtener_conexion
-from psycopg2.extras import RealDictCursor
+from fastapi import FastAPI
+from db import get_connection
+from dotenv import load_dotenv
+import os
 
-app = FastAPI(title="Sistema ERP Pro")
+load_dotenv()
 
-@app.get("/productos")
-def leer_productos():
-    # 1. Llamamos a la conexión
-    conexion = obtener_conexion()
-    if conexion is None:
-        raise HTTPException(status_code=500, detail="Error de conexión a la base de datos")
+app = FastAPI()
 
+
+@app.get("/")
+def home():
+    return {"mensaje": "API Sistema de Ventas funcionando"}
+
+
+    
+@app.get("/test-db")
+def test_db():
     try:
-        # 2. Creamos el cursor (usamos RealDictCursor para recibir diccionarios)
-        cur = conexion.cursor(cursor_factory=RealDictCursor)
-        
-        # 3. Ejecutamos la consulta basada en tu tabla.sql
-        cur.execute("SELECT id_producto, nombre, precio, stock FROM productos WHERE estado = TRUE;")
-        productos = cur.fetchall()
-        
-        return productos
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT * FROM productos;")
+        data = cursor.fetchall()
+
+        cursor.close()
+        conn.close()
+
+        return {
+            "conexion": "exitosa",
+            "datos": data
+        }
 
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
-    
-    finally:
-        # 4. Cerramos todo (como en tu imagen)
-        cur.close()
-        conexion.close()
-        print("🔌 Conexión finalizada")
+        return {"error": str(e)}
