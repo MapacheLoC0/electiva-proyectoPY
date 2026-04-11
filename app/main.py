@@ -3,9 +3,13 @@ from db import get_connection
 from dotenv import load_dotenv
 import os
 
+from routes import router
+
 load_dotenv()
 
 app = FastAPI()
+
+app.include_router(router)
 
 
 @app.get("/")
@@ -13,7 +17,6 @@ def home():
     return {"mensaje": "API Sistema de Ventas funcionando"}
 
 
-    
 @app.get("/test-db")
 def test_db():
     try:
