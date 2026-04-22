@@ -5,6 +5,7 @@ import os
 
 from routes import router
 
+
 load_dotenv()
 
 app = FastAPI()
@@ -12,12 +13,12 @@ app = FastAPI()
 app.include_router(router)
 
 
-@app.get("/")
+@app.get("/", tags=["Sistema"])
 def home():
     return {"mensaje": "API Sistema de Ventas funcionando"}
 
 
-@app.get("/test-db")
+@app.get("/test-db", tags=["Sistema"])
 def test_db():
     try:
         conn = get_connection()

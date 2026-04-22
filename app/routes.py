@@ -1,6 +1,12 @@
 from fastapi import APIRouter
 from db import get_connection
 from models import *
+from security import hash_password, verificar_password, crear_token
+from fastapi import HTTPException
+from db import get_connection
+from auth import verificar_token
+from fastapi import Depends
+
 router = APIRouter(prefix="/api", tags=["Sistema Ventas"])
 
 #CLIENTES
@@ -652,3 +658,52 @@ def eliminar_detalle(id_detalle: int):
     conn.close()
 
     return {"mensaje": "Detalle eliminado"}
+
+
+@router.post("/usuarios/registro", tags=["Usuarios"])
+def registrar_usuario(nombre: str, correo: str, password: str):
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    password_hash = hash_password(password)
+
+    cursor.execute("""
+        INSERT INTO usuarios (nombre, correo, password)
+        VALUES (%s, %s, %s)
+    """, (nombre, correo, password_hash))
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    return {"mensaje": "Usuario creado correctamente"}
+
+@router.post("/usuarios/login", tags=["Usuarios"])
+def login(correo: str, password: str):
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "SELECT id_usuario, password FROM usuarios WHERE correo = %s",
+        (correo,)
+    )
+
+    usuario = cursor.fetchone()
+
+    if not usuario:
+        raise HTTPException(status_code=400, detail="Usuario no existe")
+
+    if not verificar_password(password, usuario[1]):
+        raise HTTPException(status_code=400, detail="Contraseña incorrecta")
+
+    token = crear_token({"sub": str(usuario[0])})
+
+    cursor.close()
+    conn.close()
+
+    return {
+        "access_token": token,
+        "token_type": "bearer"
+    }
