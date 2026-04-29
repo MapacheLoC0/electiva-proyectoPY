@@ -11,11 +11,7 @@ router = APIRouter(
     tags=["Sistema Ventas"]
 )
 
-
-# =====================================================
-# CLIENTES
-# =====================================================
-
+#Clientes
 @router.post("/clientes")
 def crear_cliente(
     cliente: Cliente,
@@ -116,10 +112,7 @@ def eliminar_cliente(
     return {"mensaje": "Cliente eliminado"}
 
 
-# =====================================================
-# CATEGORIAS
-# =====================================================
-
+#Categorias
 @router.post("/categorias")
 def crear_categoria(
     categoria: Categoria,
@@ -213,10 +206,8 @@ def eliminar_categoria(
 
     return {"mensaje": "Categoria eliminada"}
 
-# =====================================================
-# PROVEEDORES
-# =====================================================
 
+#Proveedores
 @router.post("/proveedores")
 def crear_proveedor(
     proveedor: Proveedor,
@@ -320,10 +311,7 @@ def eliminar_proveedor(
     return {"mensaje": "Proveedor eliminado"}
 
 
-# =====================================================
-# PRODUCTOS
-# =====================================================
-
+#Productos
 @router.post("/productos")
 def crear_producto(
     producto: Producto,
@@ -433,10 +421,8 @@ def eliminar_producto(
 
     return {"mensaje": "Producto eliminado"}
 
-# =====================================================
-# ORDENES
-# =====================================================
 
+#Ordenes
 @router.post("/ordenes")
 def crear_orden(
     orden: Orden,
@@ -532,10 +518,7 @@ def eliminar_orden(
     return {"mensaje": "Orden eliminada"}
 
 
-# =====================================================
-# PAGOS
-# =====================================================
-
+#Pagos
 @router.post("/pagos")
 def crear_pago(
     pago: Pago,
@@ -630,10 +613,8 @@ def eliminar_pago(
 
     return {"mensaje": "Pago eliminado"}
 
-# =====================================================
-# DETALLE ORDEN
-# =====================================================
 
+#Detalle Orden
 @router.post("/detalle")
 def crear_detalle(
     detalle: DetalleOrden,
@@ -732,10 +713,7 @@ def eliminar_detalle(
     return {"mensaje": "Detalle eliminado"}
 
 
-# =====================================================
-# USUARIOS (SIN TOKEN)
-# =====================================================
-
+#Usuarios (Sin agregar el token)
 @router.post("/usuarios/registro", tags=["Usuarios"])
 def registrar_usuario(
     nombre: str,
@@ -764,7 +742,7 @@ def registrar_usuario(
         "mensaje": "Usuario creado correctamente"
     }
 
-
+#Login
 @router.post("/usuarios/login", tags=["Usuarios"])
 def login(
     correo: str,
