@@ -1,19 +1,26 @@
-from fastapi import APIRouter
+# IMPORTS
+from fastapi import APIRouter, HTTPException, Depends
 from db import get_connection
 from models import *
 from security import hash_password, verificar_password, crear_token
-from fastapi import HTTPException
-from db import get_connection
 from auth import verificar_token
-from fastapi import Depends
 
-router = APIRouter(prefix="/api", tags=["Sistema Ventas"])
 
-#CLIENTES
-# Crear Cliente
+router = APIRouter(
+    prefix="/api",
+    tags=["Sistema Ventas"]
+)
+
+
+# =====================================================
+# CLIENTES
+# =====================================================
+
 @router.post("/clientes")
-def crear_cliente(cliente: Cliente):
-
+def crear_cliente(
+    cliente: Cliente,
+    user=Depends(verificar_token)
+):
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -35,10 +42,11 @@ def crear_cliente(cliente: Cliente):
 
     return {"mensaje": "Cliente creado"}
 
-# Ver Clientes
-@router.get("/clientes")
-def obtener_clientes():
 
+@router.get("/clientes")
+def obtener_clientes(
+    user=Depends(verificar_token)
+):
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -54,10 +62,13 @@ def obtener_clientes():
 
     return resultado
 
-# Actualizar Cliente
-@router.put("/clientes/{id_cliente}")
-def actualizar_cliente(id_cliente: int, cliente: Cliente):
 
+@router.put("/clientes/{id_cliente}")
+def actualizar_cliente(
+    id_cliente: int,
+    cliente: Cliente,
+    user=Depends(verificar_token)
+):
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -84,14 +95,19 @@ def actualizar_cliente(id_cliente: int, cliente: Cliente):
 
     return {"mensaje": "Cliente actualizado"}
 
-# Eliminar Cliente
-@router.delete("/clientes/{id_cliente}")
-def eliminar_cliente(id_cliente: int):
 
+@router.delete("/clientes/{id_cliente}")
+def eliminar_cliente(
+    id_cliente: int,
+    user=Depends(verificar_token)
+):
     conn = get_connection()
     cursor = conn.cursor()
 
-    cursor.execute("DELETE FROM clientes WHERE id_cliente=%s", (id_cliente,))
+    cursor.execute(
+        "DELETE FROM clientes WHERE id_cliente=%s",
+        (id_cliente,)
+    )
 
     conn.commit()
     cursor.close()
@@ -99,11 +115,16 @@ def eliminar_cliente(id_cliente: int):
 
     return {"mensaje": "Cliente eliminado"}
 
-#CATEGORIAS
+
+# =====================================================
+# CATEGORIAS
+# =====================================================
 
 @router.post("/categorias")
-def crear_categoria(categoria: Categoria):
-
+def crear_categoria(
+    categoria: Categoria,
+    user=Depends(verificar_token)
+):
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -123,9 +144,11 @@ def crear_categoria(categoria: Categoria):
 
     return {"mensaje": "Categoria creada"}
 
-@router.get("/categorias")
-def obtener_categorias():
 
+@router.get("/categorias")
+def obtener_categorias(
+    user=Depends(verificar_token)
+):
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -141,9 +164,13 @@ def obtener_categorias():
 
     return resultado
 
-@router.put("/categorias/{id_categoria}")
-def actualizar_categoria(id_categoria: int, categoria: Categoria):
 
+@router.put("/categorias/{id_categoria}")
+def actualizar_categoria(
+    id_categoria: int,
+    categoria: Categoria,
+    user=Depends(verificar_token)
+):
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -166,9 +193,12 @@ def actualizar_categoria(id_categoria: int, categoria: Categoria):
 
     return {"mensaje": "Categoria actualizada"}
 
-@router.delete("/categorias/{id_categoria}")
-def eliminar_categoria(id_categoria: int):
 
+@router.delete("/categorias/{id_categoria}")
+def eliminar_categoria(
+    id_categoria: int,
+    user=Depends(verificar_token)
+):
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -183,10 +213,15 @@ def eliminar_categoria(id_categoria: int):
 
     return {"mensaje": "Categoria eliminada"}
 
-# POST
-@router.post("/proveedores")
-def crear_proveedor(proveedor: Proveedor):
+# =====================================================
+# PROVEEDORES
+# =====================================================
 
+@router.post("/proveedores")
+def crear_proveedor(
+    proveedor: Proveedor,
+    user=Depends(verificar_token)
+):
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -210,10 +245,10 @@ def crear_proveedor(proveedor: Proveedor):
     return {"mensaje": "Proveedor creado"}
 
 
-# GET
 @router.get("/proveedores")
-def obtener_proveedores():
-
+def obtener_proveedores(
+    user=Depends(verificar_token)
+):
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -230,10 +265,12 @@ def obtener_proveedores():
     return resultado
 
 
-# PUT
 @router.put("/proveedores/{id_proveedor}")
-def actualizar_proveedor(id_proveedor: int, proveedor: Proveedor):
-
+def actualizar_proveedor(
+    id_proveedor: int,
+    proveedor: Proveedor,
+    user=Depends(verificar_token)
+):
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -263,10 +300,11 @@ def actualizar_proveedor(id_proveedor: int, proveedor: Proveedor):
     return {"mensaje": "Proveedor actualizado"}
 
 
-# DELETE
 @router.delete("/proveedores/{id_proveedor}")
-def eliminar_proveedor(id_proveedor: int):
-
+def eliminar_proveedor(
+    id_proveedor: int,
+    user=Depends(verificar_token)
+):
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -281,10 +319,16 @@ def eliminar_proveedor(id_proveedor: int):
 
     return {"mensaje": "Proveedor eliminado"}
 
-# POST
-@router.post("/productos")
-def crear_producto(producto: Producto):
 
+# =====================================================
+# PRODUCTOS
+# =====================================================
+
+@router.post("/productos")
+def crear_producto(
+    producto: Producto,
+    user=Depends(verificar_token)
+):
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -311,10 +355,10 @@ def crear_producto(producto: Producto):
     return {"mensaje": "Producto creado"}
 
 
-# GET
 @router.get("/productos")
-def obtener_productos():
-
+def obtener_productos(
+    user=Depends(verificar_token)
+):
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -331,10 +375,12 @@ def obtener_productos():
     return resultado
 
 
-# PUT
 @router.put("/productos/{id_producto}")
-def actualizar_producto(id_producto: int, producto: Producto):
-
+def actualizar_producto(
+    id_producto: int,
+    producto: Producto,
+    user=Depends(verificar_token)
+):
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -368,10 +414,11 @@ def actualizar_producto(id_producto: int, producto: Producto):
     return {"mensaje": "Producto actualizado"}
 
 
-# DELETE
 @router.delete("/productos/{id_producto}")
-def eliminar_producto(id_producto: int):
-
+def eliminar_producto(
+    id_producto: int,
+    user=Depends(verificar_token)
+):
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -386,10 +433,15 @@ def eliminar_producto(id_producto: int):
 
     return {"mensaje": "Producto eliminado"}
 
-# POST
-@router.post("/ordenes")
-def crear_orden(orden: Orden):
+# =====================================================
+# ORDENES
+# =====================================================
 
+@router.post("/ordenes")
+def crear_orden(
+    orden: Orden,
+    user=Depends(verificar_token)
+):
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -411,10 +463,10 @@ def crear_orden(orden: Orden):
     return {"mensaje": "Orden creada"}
 
 
-# GET
 @router.get("/ordenes")
-def obtener_ordenes():
-
+def obtener_ordenes(
+    user=Depends(verificar_token)
+):
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -431,10 +483,12 @@ def obtener_ordenes():
     return resultado
 
 
-# PUT
 @router.put("/ordenes/{id_orden}")
-def actualizar_orden(id_orden: int, orden: Orden):
-
+def actualizar_orden(
+    id_orden: int,
+    orden: Orden,
+    user=Depends(verificar_token)
+):
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -456,12 +510,13 @@ def actualizar_orden(id_orden: int, orden: Orden):
     conn.close()
 
     return {"mensaje": "Orden actualizada"}
-    
 
-# DELETE
+
 @router.delete("/ordenes/{id_orden}")
-def eliminar_orden(id_orden: int):
-
+def eliminar_orden(
+    id_orden: int,
+    user=Depends(verificar_token)
+):
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -476,10 +531,16 @@ def eliminar_orden(id_orden: int):
 
     return {"mensaje": "Orden eliminada"}
 
-# POST
-@router.post("/pagos")
-def crear_pago(pago: Pago):
 
+# =====================================================
+# PAGOS
+# =====================================================
+
+@router.post("/pagos")
+def crear_pago(
+    pago: Pago,
+    user=Depends(verificar_token)
+):
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -501,10 +562,10 @@ def crear_pago(pago: Pago):
     return {"mensaje": "Pago registrado"}
 
 
-# GET
 @router.get("/pagos")
-def obtener_pagos():
-
+def obtener_pagos(
+    user=Depends(verificar_token)
+):
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -521,10 +582,12 @@ def obtener_pagos():
     return resultado
 
 
-# PUT
 @router.put("/pagos/{id_pago}")
-def actualizar_pago(id_pago: int, pago: Pago):
-
+def actualizar_pago(
+    id_pago: int,
+    pago: Pago,
+    user=Depends(verificar_token)
+):
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -548,10 +611,11 @@ def actualizar_pago(id_pago: int, pago: Pago):
     return {"mensaje": "Pago actualizado"}
 
 
-# DELETE
 @router.delete("/pagos/{id_pago}")
-def eliminar_pago(id_pago: int):
-
+def eliminar_pago(
+    id_pago: int,
+    user=Depends(verificar_token)
+):
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -566,10 +630,15 @@ def eliminar_pago(id_pago: int):
 
     return {"mensaje": "Pago eliminado"}
 
-# POST
-@router.post("/detalle")
-def crear_detalle(detalle: DetalleOrden):
+# =====================================================
+# DETALLE ORDEN
+# =====================================================
 
+@router.post("/detalle")
+def crear_detalle(
+    detalle: DetalleOrden,
+    user=Depends(verificar_token)
+):
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -592,10 +661,10 @@ def crear_detalle(detalle: DetalleOrden):
     return {"mensaje": "Detalle agregado"}
 
 
-# GET
 @router.get("/detalle")
-def obtener_detalle():
-
+def obtener_detalle(
+    user=Depends(verificar_token)
+):
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -612,10 +681,12 @@ def obtener_detalle():
     return resultado
 
 
-# PUT
 @router.put("/detalle/{id_detalle}")
-def actualizar_detalle(id_detalle: int, detalle: DetalleOrden):
-
+def actualizar_detalle(
+    id_detalle: int,
+    detalle: DetalleOrden,
+    user=Depends(verificar_token)
+):
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -641,10 +712,11 @@ def actualizar_detalle(id_detalle: int, detalle: DetalleOrden):
     return {"mensaje": "Detalle actualizado"}
 
 
-# DELETE
 @router.delete("/detalle/{id_detalle}")
-def eliminar_detalle(id_detalle: int):
-
+def eliminar_detalle(
+    id_detalle: int,
+    user=Depends(verificar_token)
+):
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -660,9 +732,16 @@ def eliminar_detalle(id_detalle: int):
     return {"mensaje": "Detalle eliminado"}
 
 
-@router.post("/usuarios/registro", tags=["Usuarios"])
-def registrar_usuario(nombre: str, correo: str, password: str):
+# =====================================================
+# USUARIOS (SIN TOKEN)
+# =====================================================
 
+@router.post("/usuarios/registro", tags=["Usuarios"])
+def registrar_usuario(
+    nombre: str,
+    correo: str,
+    password: str
+):
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -671,34 +750,55 @@ def registrar_usuario(nombre: str, correo: str, password: str):
     cursor.execute("""
         INSERT INTO usuarios (nombre, correo, password)
         VALUES (%s, %s, %s)
-    """, (nombre, correo, password_hash))
+    """, (
+        nombre,
+        correo,
+        password_hash
+    ))
 
     conn.commit()
     cursor.close()
     conn.close()
 
-    return {"mensaje": "Usuario creado correctamente"}
+    return {
+        "mensaje": "Usuario creado correctamente"
+    }
+
 
 @router.post("/usuarios/login", tags=["Usuarios"])
-def login(correo: str, password: str):
-
+def login(
+    correo: str,
+    password: str
+):
     conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute(
-        "SELECT id_usuario, password FROM usuarios WHERE correo = %s",
+        """
+        SELECT id_usuario, password
+        FROM usuarios
+        WHERE correo = %s
+        """,
         (correo,)
     )
 
     usuario = cursor.fetchone()
 
     if not usuario:
-        raise HTTPException(status_code=400, detail="Usuario no existe")
+        raise HTTPException(
+            status_code=400,
+            detail="Usuario no existe"
+        )
 
     if not verificar_password(password, usuario[1]):
-        raise HTTPException(status_code=400, detail="Contraseña incorrecta")
+        raise HTTPException(
+            status_code=400,
+            detail="Contraseña incorrecta"
+        )
 
-    token = crear_token({"sub": str(usuario[0])})
+    token = crear_token({
+        "sub": str(usuario[0])
+    })
 
     cursor.close()
     conn.close()
