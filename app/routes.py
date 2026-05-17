@@ -785,3 +785,107 @@ def login(
         "access_token": token,
         "token_type": "bearer"
     }
+@router.get("/kpi/ventas", tags=["KPIs"])
+def kpi_ventas(user=Depends(verificar_token)):
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT COALESCE(SUM(total),0)
+        FROM ordenes
+        WHERE estado = 'pagada'
+    """)
+
+    total = cursor.fetchone()[0]
+
+    cursor.close()
+    conn.close()
+
+    return {
+        "total_ventas": float(total)
+    }
+
+@router.get("/kpi/clientes", tags=["KPIs"])
+def kpi_clientes(user=Depends(verificar_token)):
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT COUNT(*) FROM clientes")
+
+    total = cursor.fetchone()[0]
+
+    cursor.close()
+    conn.close()
+
+    return {
+        "total_clientes": total
+    }
+
+@router.get("/kpi/productos", tags=["KPIs"])
+def kpi_productos(user=Depends(verificar_token)):
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT COUNT(*) FROM productos")
+
+    total = cursor.fetchone()[0]
+
+    cursor.close()
+    conn.close()
+
+    return {
+        "total_productos": total
+    }
+
+@router.get("/kpi/ordenes", tags=["KPIs"])
+def kpi_ordenes(user=Depends(verificar_token)):
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT COUNT(*) FROM ordenes")
+
+    total = cursor.fetchone()[0]
+
+    cursor.close()
+    conn.close()
+
+    return {
+        "total_ordenes": total
+    }
+
+@router.get("/kpi/productos-mas-vendidos", tags=["KPIs"])
+def productos_mas_vendidos(user=Depends(verificar_token)):
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT
+            p.nombre,
+            SUM(d.cantidad) AS vendidos
+        FROM detalle_orden d
+        JOIN productos p
+        ON d.id_producto = p.id_producto
+        GROUP BY p.nombre
+        ORDER BY vendidos DESC
+        LIMIT 5
+    """)
+
+    data = cursor.fetchall()
+
+    resultado = []
+
+    for row in data:
+        resultado.append({
+            "producto": row[0],
+            "vendidos": row[1]
+        })
+
+    cursor.close()
+    conn.close()
+
+    return resultado

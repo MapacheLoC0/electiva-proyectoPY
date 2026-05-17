@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { Users, Package, ShoppingCart, CreditCard, Tag, Truck, FileText, ArrowRight } from 'lucide-react'
 import { getClientes, getProductos, getOrdenes, getPagos, getCategorias, getProveedores } from '../services/api'
 import { StatCard } from '../components/UI'
+import KpiCard from '../components/KpiCard'
+import { obtenerKPIs } from '../services/kpiService'
 
 const modules = [
   { label: 'Clientes', to: '/clientes', icon: Users, color: 'var(--green)' },
@@ -17,6 +19,7 @@ const modules = [
 export default function DashboardPage() {
   const navigate = useNavigate()
   const [stats, setStats] = useState({ clientes: '-', productos: '-', ordenes: '-', ingresos: '-', categorias: '-', proveedores: '-' })
+  const [kpis, setKpis] = useState(null)
 
   useEffect(() => {
     const load = async () => {
@@ -24,9 +27,14 @@ export default function DashboardPage() {
         const [c, p, o, pg, cat, prov] = await Promise.allSettled([
           getClientes(), getProductos(), getOrdenes(), getPagos(), getCategorias(), getProveedores()
         ])
+
+        const kpiData = await obtenerKPIs()
+        setKpis(kpiData)
+
         const ingresos = pg.status === 'fulfilled'
           ? pg.value.data.filter(p => p.estado_pago === 'completado').reduce((s, p) => s + parseFloat(p.monto || 0), 0)
           : 0
+        
         setStats({
           clientes: c.status === 'fulfilled' ? c.value.data.length : '?',
           productos: p.status === 'fulfilled' ? p.value.data.length : '?',
@@ -68,6 +76,49 @@ export default function DashboardPage() {
         <StatCard label="Categorías" value={stats.categorias} icon={Tag} color="var(--blue)" />
         <StatCard label="Proveedores" value={stats.proveedores} icon={Truck} color="var(--amber)" />
       </div>
+
+      {/* KPIs Backend */}
+<div style={{ marginBottom: 40 }}>
+  <h2 style={{
+    fontFamily: 'var(--font-display)',
+    fontSize: 16,
+    fontWeight: 600,
+    marginBottom: 16,
+    color: 'var(--text-secondary)'
+  }}>
+    KPIs del Sistema
+  </h2>
+
+  <div style={{
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+    gap: 14
+  }}>
+    <KpiCard
+      titulo="Ventas Totales"
+      valor={`$${kpis?.ventas_totales || 0}`}
+      color="var(--blue)"
+    />
+
+    <KpiCard
+      titulo="Clientes"
+      valor={kpis?.clientes || 0}
+      color="var(--green)"
+    />
+
+    <KpiCard
+      titulo="Productos"
+      valor={kpis?.productos || 0}
+      color="var(--amber)"
+    />
+
+    <KpiCard
+      titulo="Órdenes"
+      valor={kpis?.ordenes || 0}
+      color="var(--accent)"
+    />
+  </div>
+</div>
 
       {/* Modules grid */}
       <div style={{ marginBottom: 16 }}>
