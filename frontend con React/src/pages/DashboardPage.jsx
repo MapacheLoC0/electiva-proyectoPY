@@ -95,26 +95,20 @@ export default function DashboardPage() {
     gap: 14
   }}>
     <KpiCard
-      titulo="Ventas Totales"
-      valor={`$${kpis?.ventas_totales || 0}`}
-      color="var(--blue)"
-    />
-
-    <KpiCard
-      titulo="Clientes"
-      valor={kpis?.clientes || 0}
+      titulo="Producto Más Vendido"
+      valor={kpis?.producto_mas_vendido || 'Sin datos'}
       color="var(--green)"
     />
 
     <KpiCard
-      titulo="Productos"
-      valor={kpis?.productos || 0}
+      titulo="Productos con Stock Bajo y alto"
+      valor={kpis?.stock_bajo || 0}
       color="var(--amber)"
     />
 
     <KpiCard
-      titulo="Órdenes"
-      valor={kpis?.ordenes || 0}
+      titulo="Última Orden"
+      valor={`#${kpis?.ultima_orden || 0}`}
       color="var(--accent)"
     />
   </div>

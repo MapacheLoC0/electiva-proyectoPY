@@ -10,21 +10,25 @@ const authHeaders = () => ({
 
 export const obtenerKPIs = async () => {
   const [
-    ventas,
-    clientes,
-    productos,
-    ordenes
+    productoMasVendido,
+    stockBajo,
+    ultimaOrden
   ] = await Promise.all([
-    axios.get(`${API}/kpi/ventas`, authHeaders()),
-    axios.get(`${API}/kpi/clientes`, authHeaders()),
-    axios.get(`${API}/kpi/productos`, authHeaders()),
-    axios.get(`${API}/kpi/ordenes`, authHeaders())
+    axios.get(`${API}/kpi/productos-mas-vendidos`, authHeaders()),
+    axios.get(`${API}/kpi/stock-bajo`, authHeaders()),
+    axios.get(`${API}/kpi/ultima-orden`, authHeaders())
   ])
 
   return {
-    ventas_totales: ventas.data.total_ventas,
-    clientes: clientes.data.total_clientes,
-    productos: productos.data.total_productos,
-    ordenes: ordenes.data.total_ordenes
+    producto_mas_vendido:
+      productoMasVendido.data.producto,
+
+    stock_bajo:
+      stockBajo.data.length > 0
+        ? stockBajo.data.map(p => `${p.producto} (${p.stock})`).join(', ')
+        : 'Sin stock bajo',
+
+    ultima_orden:
+      ultimaOrden.data.ultima_orden
   }
 }
